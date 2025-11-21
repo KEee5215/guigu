@@ -3,15 +3,22 @@ import axios from 'axios'
 //引入element-plus
 import { ElMessage } from 'element-plus'
 
+import { useUserStore } from '@/store/modules/user'
+
 // 1.创建axios实例,进行基础配置
 let request = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
   timeout: 5000,
 })
+
 //2.给request实例添加请求与响应拦截器
 //发请求时,就会触发这个拦截器,执行拦截器中的方法
 request.interceptors.request.use((config) => {
   //config对象有headers属性,经常给服务器(后端)携带公共参数
+
+  const userStore = useUserStore()
+  config.headers.token = userStore.token
+  // console.log(config)
   return config //拦截器中的方法必须返回config
 })
 //3.响应拦截器

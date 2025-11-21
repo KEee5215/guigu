@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia'
-import { reqLogin } from '@/api/user'
+import { reqLogin, reqUserInfo } from '@/api/user'
 import { type LoginForm } from '@/api/user/type'
 import type { userState } from './type/type'
-import { GET_TOKEN, SET_TOKEN } from '@/utils/tokenHelper'
+import { type checkUser } from '@/api/user/type'
+import { GET_TOKEN, REMOVE_TOKEN, SET_TOKEN } from '@/utils/tokenHelper'
+
+//引入静态路由数组
+import { constantRoutes } from '@/router/routes'
 
 //  `defineStore()` 的返回值的命名是自由的
 // 但最好含有 store 的名字，且以 `use` 开头，以 `Store` 结尾。
@@ -13,6 +17,9 @@ export const useUserStore = defineStore('User', {
   state: (): userState => {
     return {
       token: GET_TOKEN() || '', //用户唯一标识
+      menuRoutes: constantRoutes, //用户菜单路由
+      username: '',
+      avatar: '',
     }
   },
   // 操作state的方法
@@ -30,6 +37,27 @@ export const useUserStore = defineStore('User', {
       else {
         return Promise.reject(new Error(result.data.message))
       }
+    },
+    // 获取用户信息
+    async getUserInfo() {
+      // console.log('获取用户信息')
+      let result = await reqUserInfo()
+      // console.log(result)
+      if (result.code === 200) {
+        this.username = (result.data.checkUser as checkUser).username
+        this.avatar = (result.data.checkUser as checkUser).avatar
+        return 'ok'
+      } else {
+        return Promise.reject(new Error(result.data.message))
+      }
+    },
+
+    // 退出登录
+    async userLogout() {
+      this.token = ''
+      this.username = ''
+      this.avatar = ''
+      REMOVE_TOKEN()
     },
   },
   // 计算属性

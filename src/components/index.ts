@@ -1,10 +1,13 @@
 import SvgIcon from '@/components/SvgIcon/index.vue'
 import Pagination from '@/components/Pagination/index.vue'
 
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
 // console.log(SvgIcon, Pagination)
 const allGlobalComponents = { SvgIcon, Pagination }
 
 // console.log(allGlobalComponents)
+// console.log(ElementPlusIconsVue)
 
 export default {
   install(app: any) {
@@ -16,5 +19,8 @@ export default {
         allGlobalComponents[key as keyof typeof allGlobalComponents],
       )
     })
+    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+      app.component(key, component)
+    }
   },
 }

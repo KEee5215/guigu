@@ -43,13 +43,15 @@
 <script setup lang="ts">
 import { User, Lock } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/modules/user'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElNotification } from 'element-plus'
 
 import { ref } from 'vue'
 import { getTime } from '@/utils/getTimeHelper'
+import { ro } from 'element-plus/es/locales.mjs'
 
 const router = useRouter()
+const route = useRoute()
 let userStore = useUserStore()
 // 登录表单引用
 const loginFormRef = ref()
@@ -83,7 +85,11 @@ const onSubmit = async () => {
   try {
     await userStore.userLogin(loginForm.value)
     //登录成功 -> 跳转首页
-    router.push({ name: 'layout' })
+    if (route.query.redirect) {
+      router.push({ path: route.query.redirect as string })
+    } else {
+      router.push({ name: 'layout' })
+    }
     //登录成功 -> 提示成功信息
     ElNotification({
       type: 'success',

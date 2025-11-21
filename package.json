@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --open",
+    "dev": "vite",
     "build:test": "vue-tsc && vite build --mode test",
     "build:pro": "vue-tsc && vite build --mode production",
     "build": "vue-tsc -b && vite build",
@@ -21,7 +21,9 @@
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.13.2",
     "element-plus": "^2.11.8",
+    "nprogress": "^0.2.0",
     "pinia": "^3.0.4",
+    "unplugin-vue-setup-extend-plus": "^1.0.1",
     "vue": "^3.5.24",
     "vue-router": "^4.6.3"
   },

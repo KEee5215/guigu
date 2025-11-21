@@ -6,11 +6,13 @@ import vue from '@vitejs/plugin-vue'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import path from 'path'
 import { viteMockServe } from 'vite-plugin-mock'
+import vueSetupExtend from 'unplugin-vue-setup-extend-plus/vite' //vue3 set up 命名插件
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => {
   return {
     plugins: [
+      vueSetupExtend({}),
       vue(),
       AutoImport({
         resolvers: [ElementPlusResolver()],

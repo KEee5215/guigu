@@ -1,48 +1,54 @@
 <template>
   <div class="layout-container">
-    <div class="layout-slider">
+    <div
+      class="layout-slider"
+      :class="{ collapse: layOutsettingStore.isCollapse }"
+    >
       <logo />
       <el-scrollbar class="scrollbar">
         <el-menu
-          default-active="1"
-          class="el-menu-vertical-demo"
-          background-color="#22272e"
+          class="el-menu"
           text-color="#fff"
+          background-color="#22272e"
           active-text-color="#ffd04b"
+          :default-active="route.path"
+          :collapse="layOutsettingStore.isCollapse"
         >
-          <el-menu-item index="1">首页</el-menu-item>
-          <el-menu-item index="2">数据大屏</el-menu-item>
-
-          <el-sub-menu index="3">
-            <template #title>
-              <el-icon><location /></el-icon>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="3-1">用户管理</el-menu-item>
-            <el-menu-item index="3-2">角色管理</el-menu-item>
-            <el-menu-item index="3-3">菜单管理</el-menu-item>
-          </el-sub-menu>
-          <el-sub-menu index="4">
-            <template #title>
-              <el-icon><location /></el-icon>
-              <span>商品管理</span>
-            </template>
-            <el-menu-item index="4-1">商品列表</el-menu-item>
-            <el-menu-item index="4-2">商品分类</el-menu-item>
-            <el-menu-item index="4-3">商品规格</el-menu-item>
-          </el-sub-menu>
+          <Menu :menuList="userStore.menuRoutes" />
         </el-menu>
       </el-scrollbar>
     </div>
-    <div class="layout-tabbar">这是头部</div>
-    <div class="layout-main">
-      <p style="height: 1000px; background-color: aquamarine">这是主体</p>
+    <!-- 上边栏 -->
+    <div
+      class="layout-tabbar"
+      :class="{ collapse: layOutsettingStore.isCollapse }"
+    >
+      <Tabbar />
+    </div>
+    <!-- 主内容 -->
+    <div
+      class="layout-main"
+      :class="{ collapse: layOutsettingStore.isCollapse }"
+    >
+      <Main />
     </div>
   </div>
 </template>
-<script setup lang="ts">
-import { Location, User } from '@element-plus/icons-vue'
+<script setup lang="ts" name="Layout">
 import Logo from './logo/index.vue'
+import Menu from './menu/index.vue'
+import Main from './main/index.vue'
+import Tabbar from './tabbar/index.vue'
+import { useUserStore } from '@/store/modules/user'
+import { useRoute } from 'vue-router'
+
+import { useLayOutSettingStore } from '@/store/modules/setting'
+
+let layOutsettingStore = useLayOutSettingStore()
+
+const route = useRoute()
+
+const userStore = useUserStore()
 </script>
 
 <style lang="scss" scoped>
@@ -50,14 +56,23 @@ import Logo from './logo/index.vue'
   height: 100vh;
   width: 100%;
   background-color: aquamarine;
+
   .layout-slider {
     height: 100%;
     width: $layout-slider-width;
     background-color: $layout-slider-color;
-
+    transition: all 0.3s ease-in-out;
     .scrollbar {
       //   padding: 20px;
       height: calc(100% - $layout-tabbar-height);
+      color: #fcfcfc;
+      .el-menu {
+        border-right: none;
+        background-color: $layout-slider-color;
+      }
+    }
+    &.collapse {
+      width: $layout-slider-min-width;
     }
   }
   .layout-tabbar {
@@ -68,6 +83,12 @@ import Logo from './logo/index.vue'
     top: 0;
     left: $layout-slider-width;
     color: #fcfcfc;
+    transition: all 0.3s ease-in-out;
+
+    &.collapse {
+      width: calc(100vw - $layout-slider-min-width);
+      left: $layout-slider-min-width;
+    }
   }
   .layout-main {
     height: calc(100% - $layout-tabbar-height);
@@ -78,6 +99,13 @@ import Logo from './logo/index.vue'
     left: $layout-slider-width;
     padding: 20px;
     overflow: auto;
+    transition: all 0.3s ease-in-out;
+
+    &.collapse {
+      width: calc(100vw - $layout-slider-min-width);
+
+      left: $layout-slider-min-width;
+    }
   }
 }
 </style>

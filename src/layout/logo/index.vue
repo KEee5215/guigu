@@ -8,7 +8,7 @@
     <p>{{ setting.title }}</p>
   </div>
 </template>
-<script setup lang="ts">
+<script setup lang="ts" name="Logo">
 import setting from '@/setting'
 </script>
 
