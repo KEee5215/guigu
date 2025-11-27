@@ -34,7 +34,7 @@ router.beforeEach(async (to, from) => {
         } catch (error) {
           //用户信息获取失败,因为是token过期了，需要重新登录
           //或者用户手动修改改token了
-          userStore.userLogout()
+          await userStore.userLogout()
           return { path: '/login', query: { redirect: to.path } }
         }
       }

@@ -77,7 +77,7 @@ const loading = ref(false)
 
 const onSubmit = async () => {
   // 校验表单
-  console.log(loginFormRef.value.validate())
+  // console.log(loginFormRef.value.validate())
   await loginFormRef.value.validate()
   //   console.log(loginForm.value)
   loading.value = true

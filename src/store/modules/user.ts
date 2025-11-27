@@ -1,8 +1,14 @@
 import { defineStore } from 'pinia'
-import { reqLogin, reqUserInfo } from '@/api/user'
-import { type LoginForm } from '@/api/user/type'
+import { reqLogin, reqLogout, reqUserInfo } from '@/api/user'
+
 import type { userState } from './type/type'
-import { type checkUser } from '@/api/user/type'
+
+import type {
+  loginFormData,
+  loginResponseData,
+  userInfoResponseData,
+} from '@/api/user/type'
+
 import { GET_TOKEN, REMOVE_TOKEN, SET_TOKEN } from '@/utils/tokenHelper'
 
 //引入静态路由数组
@@ -25,39 +31,47 @@ export const useUserStore = defineStore('User', {
   // 操作state的方法
   actions: {
     // 登录方法
-    async userLogin(data: LoginForm) {
-      let result = await reqLogin(data)
+    async userLogin(data: loginFormData) {
+      let result: loginResponseData = await reqLogin(data)
+      // console.log(result)
       //200登录成功 ->token存储
       if (result.code === 200) {
-        this.token = result.data.token as string
-        SET_TOKEN(result.data.token as string)
+        this.token = result.data
+        SET_TOKEN(result.data)
         return 'ok'
       }
       //登录失败 ->提示错误信息
       else {
-        return Promise.reject(new Error(result.data.message))
+        return Promise.reject(new Error(result.message))
       }
     },
     // 获取用户信息
     async getUserInfo() {
       // console.log('获取用户信息')
-      let result = await reqUserInfo()
-      // console.log(result)
+      let result: userInfoResponseData = await reqUserInfo()
+      console.log(result)
       if (result.code === 200) {
-        this.username = (result.data.checkUser as checkUser).username
-        this.avatar = (result.data.checkUser as checkUser).avatar
+        this.username = result.data.name
+        this.avatar = result.data.avatar
         return 'ok'
       } else {
-        return Promise.reject(new Error(result.data.message))
+        return Promise.reject(new Error(result.message))
       }
     },
 
     // 退出登录
     async userLogout() {
-      this.token = ''
-      this.username = ''
-      this.avatar = ''
-      REMOVE_TOKEN()
+      let result: any = await reqLogout()
+      console.log(result)
+      if (result.code === 200) {
+        this.token = ''
+        this.username = ''
+        this.avatar = ''
+        REMOVE_TOKEN()
+        return 'ok'
+      } else {
+        return Promise.reject(new Error(result.message))
+      }
     },
   },
   // 计算属性

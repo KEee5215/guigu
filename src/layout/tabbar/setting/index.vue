@@ -59,11 +59,11 @@ const iconName = computed(() => {
 })
 
 // 退出登录
-function userLogout() {
+async function userLogout() {
   //向服务器发送请求
   //暂时没有
   // 清除登录信息
-  userStore.userLogout()
+  await userStore.userLogout()
   // 跳转登录页面
 
   router.push({ path: '/login', query: { redirect: route.path } })

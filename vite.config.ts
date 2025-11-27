@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
@@ -9,7 +9,8 @@ import { viteMockServe } from 'vite-plugin-mock'
 import vueSetupExtend from 'unplugin-vue-setup-extend-plus/vite' //vue3 set up 命名插件
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
+  let env = loadEnv(mode, process.cwd())
   return {
     plugins: [
       vueSetupExtend({}),
@@ -41,9 +42,19 @@ export default defineConfig(({ command }) => {
         scss: {
           // 如果你用的是 Dart Sass（推荐），不需要 javascriptEnabled
           // javascriptEnabled: true, // ❌ 这是 node-sass 的选项，Dart Sass 不需要
-
           // ✅ 关键：自动注入全局变量
           additionalData: '@import "@/styles/variable.scss";',
+        },
+      },
+    },
+
+    server: {
+      proxy: {
+        [env.VITE_APP_BASE_API]: {
+          target: env.VITE_SERVE,
+          // target: 'http://192.168.100.128:10086',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
     },
