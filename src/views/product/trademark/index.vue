@@ -34,7 +34,18 @@
             >
               修改
             </el-button>
-            <el-button size="small" type="danger" icon="Delete">删除</el-button>
+            <el-popconfirm
+              :title="`确定删除${row.tmName}吗?`"
+              width="250px"
+              icon="Delete"
+              @confirm="deleteTrademark(row.id)"
+            >
+              <template #reference>
+                <el-button size="small" type="danger" icon="Delete">
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -96,6 +107,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import {
   reqAddOrUpdateTrademark,
+  reqDeleteTrademark,
   reqHashTrademark,
 } from '@/api/product/trademark'
 import { useUserStore } from '@/store/modules/user'
@@ -239,6 +251,17 @@ const rules = reactive<FormRules<typeof trademarkParams.value>>({
   tmName: [{ required: true, validator: validateTmName, trigger: 'blur' }],
   logoUrl: [{ required: true, validator: validateLogoUrl }],
 })
+
+// 删除品牌
+async function deleteTrademark(id: number) {
+  let res = await reqDeleteTrademark(id)
+  if (res.code === 200) {
+    ElMessage.success('删除成功')
+    getHashTrademark(currentPage.value, pageSize.value)
+  } else {
+    ElMessage.error('删除失败')
+  }
+}
 </script>
 
 <style scoped lang="scss">
