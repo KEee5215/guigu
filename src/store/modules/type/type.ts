@@ -6,3 +6,11 @@ export interface userState {
   username: string
   avatar: string
 }
+
+export interface categoryState {
+  data: {
+    c1Id: number | null
+    c2Id: number | null
+    c3Id: number | null
+  }
+}

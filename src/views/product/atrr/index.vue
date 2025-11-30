@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card style="margin-bottom: 10px">
-      <div class="category">
+      <!-- <div class="category">
         <span>一级分类</span>
         <el-select
           v-model="data.c1Id"
@@ -47,7 +47,8 @@
             :value="item.id"
           />
         </el-select>
-      </div>
+      </div> -->
+      <Category :scene />
     </el-card>
     <!-- 第二个card -->
     <el-card style="max-width: 100%">
@@ -59,7 +60,7 @@
           icon="CirclePlus"
           class="button"
           @click="addAttr"
-          :disabled="!data.c3Id"
+          :disabled="!categoryStore.data.c3Id"
         >
           添加平台属性
         </el-button>
@@ -176,32 +177,19 @@ import {
   reqAddOrUpdateAttrInfo,
   reqAttrInfoList,
   reqDeleteAttr,
-  reqOneCategory,
-  reqThreeCategory,
-  reqTwoCategory,
 } from '@/api/product/attr'
 import type {
-  attrInfo,
   attrInfoList,
   attrInfoListResponseData,
   attrParams,
   attrValue,
-  attrValueList,
-  categorys,
 } from '@/api/product/attr/type'
 import { ElMessage } from 'element-plus'
+import Category from '@/components/Category/index.vue'
+import { nextTick, ref, watch } from 'vue'
+import { useCategoryStore } from '@/store/modules/category'
 
-import { nextTick, onMounted, ref, watch } from 'vue'
-
-const data = ref({
-  c1Id: null,
-  c2Id: null,
-  c3Id: null,
-})
-
-const category1 = ref<categorys>([])
-const category2 = ref<categorys>([])
-const category3 = ref<categorys>([])
+const categoryStore = useCategoryStore()
 
 const attrInfoList = ref<attrInfoList>([])
 
@@ -219,56 +207,21 @@ const attrParams = ref<attrParams>({
 
 let inputArr = ref<any>([])
 
-async function categoryOne() {
-  data.value.c2Id = null
-  data.value.c3Id = null
-  let res = await reqOneCategory()
-  if (res.code === 200) {
-    category1.value = res.data
-  } else {
-    ElMessage.error(res.message)
-  }
-}
-async function categoryTwo() {
-  data.value.c3Id = null
-  if (!data.value.c1Id) {
-    ElMessage.error('请选择一级分类')
-    return
-  }
-
-  let res = await reqTwoCategory(data.value.c1Id)
-  if (res.code === 200) {
-    category2.value = res.data
-  } else {
-    ElMessage.error(res.message)
-  }
-}
-
-async function categoryThree() {
-  if (!data.value.c2Id) {
-    ElMessage.error('请选择二级分类')
-    return
-  }
-
-  let res = await reqThreeCategory(data.value.c2Id)
-  if (res.code === 200) {
-    category3.value = res.data
-  } else {
-    ElMessage.error(res.message)
-  }
-}
-
 // hook
 async function useCategory() {
-  if (data.value.c1Id && data.value.c2Id && data.value.c3Id) {
+  if (
+    categoryStore.data.c1Id &&
+    categoryStore.data.c2Id &&
+    categoryStore.data.c3Id
+  ) {
     let res: attrInfoListResponseData = await reqAttrInfoList(
-      data.value.c1Id,
-      data.value.c2Id,
-      data.value.c3Id,
+      categoryStore.data.c1Id,
+      categoryStore.data.c2Id,
+      categoryStore.data.c3Id,
     )
     if (res.code === 200) {
       attrInfoList.value = res.data
-      attrParams.value.categoryId = data.value.c3Id
+      attrParams.value.categoryId = categoryStore.data.c3Id
     } else {
       ElMessage.error(res.message)
     }
@@ -277,7 +230,7 @@ async function useCategory() {
 
 //监听三级分类
 watch(
-  () => data.value.c3Id,
+  () => categoryStore.data.c3Id,
   async () => {
     attrInfoList.value = []
 
@@ -294,7 +247,7 @@ const addAttrValue = () => {
   }
 
   // 检查是否已填写三级分类ID
-  if (!data.value.c3Id) {
+  if (!categoryStore.data.c3Id) {
     ElMessage.error('请选择三级分类')
     return
   }
