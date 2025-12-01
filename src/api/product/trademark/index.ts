@@ -1,5 +1,5 @@
 import request from '@/utils/requestHelper'
-import type { trademarkResponseData } from './type'
+import type { trademarkListResponseData, trademarkResponseData } from './type'
 
 const API = {
   //分页获取品牌
@@ -10,6 +10,8 @@ const API = {
   UPDATE_TRADEMARK_URL: '/admin/product/baseTrademark/update',
   //删除品牌
   DELETE_TRADEMARK_URL: '/admin/product/baseTrademark/remove/',
+  //获取品牌
+  GET_ALL_TRADEMARK_URL: '/admin/product/baseTrademark/getTrademarkList',
 }
 
 //获取品牌
@@ -29,3 +31,6 @@ export const reqAddOrUpdateTrademark = (data: any) => {
 
 export const reqDeleteTrademark = (id: number) =>
   request.delete<any, any>(API.DELETE_TRADEMARK_URL + id)
+
+export const reqGetAllTrademark = (): Promise<trademarkListResponseData> =>
+  request.get(API.GET_ALL_TRADEMARK_URL)

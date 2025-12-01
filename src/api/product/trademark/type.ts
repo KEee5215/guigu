@@ -27,3 +27,7 @@ export interface trademarkData {
 export interface trademarkResponseData extends responseData {
   data: trademarkData
 }
+
+export interface trademarkListResponseData extends responseData {
+  data: records
+}
