@@ -11,7 +11,13 @@
         添加品牌
       </el-button>
       <!-- 表格 -->
-      <el-table :data="data" stripe style="width: 100%" border>
+      <el-table
+        :data="data"
+        stripe
+        style="width: 100%"
+        border
+        empty-text="暂无数据"
+      >
         <el-table-column
           prop="id"
           label="序号"

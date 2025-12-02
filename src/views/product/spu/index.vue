@@ -17,6 +17,7 @@
           stripe
           style="width: 100%; min-width: 600px"
           border
+          empty-text="暂无数据"
         >
           <el-table-column prop="id" type="index" label="序号" width="80" />
           <el-table-column prop="spuName" label="SPU名称" width="280" />
@@ -84,10 +85,16 @@ const tableData = ref<records>([])
 // 场景切换
 const scene = ref<number>(0) // 0: 列表  1:spu  2:  sku
 
-function changeScene(num: number) {
+function changeScene(num: number, addOrEdit: boolean) {
   scene.value = num
 
-  getSpuPage(1, pageSize.value)
+  if (addOrEdit) {
+    // 添加,回到第一页
+    getSpuPage(1, pageSize.value)
+  } else {
+    // 修改,回到当前页
+    getSpuPage(currentPage.value, pageSize.value)
+  }
 }
 
 const spu = ref<any>()
@@ -99,11 +106,12 @@ const total = ref<number>(0)
 
 function addSpu() {
   scene.value = 1
+  spu.value.initAdd(categoryStore.data.c3Id)
 }
 
 function updateSpu(row: record) {
   scene.value = 1
-  spu.value.init(row)
+  spu.value.initUpdate(row)
 }
 
 async function getSpuPage(page: number, limit: number) {

@@ -57,7 +57,13 @@
         >
           + 添加添加销售属性
         </el-button>
-        <el-table stripe border style="margin-top: 10px" :data="saleAttrList">
+        <el-table
+          stripe
+          border
+          style="margin-top: 10px"
+          :data="saleAttrList"
+          empty-text="暂无数据"
+        >
           <el-table-column
             label="序号"
             type="index"
@@ -134,9 +140,12 @@ import { reqAddOrUpdateSpuInfo, reqBaseSaleAttrList } from '@/api/product/spu'
 import type { record, baseSaleAttrValue } from '@/api/product/spu/type'
 import { reqGetAllTrademark } from '@/api/product/trademark'
 import type { TradeMark } from '@/api/product/trademark/type'
+import { useCategoryStore } from '@/store/modules/category'
 import useUserStore from '@/store/modules/user'
 import { ElMessage, type UploadProps, type UploadRawFile } from 'element-plus'
 import { ref, computed } from 'vue'
+
+const categoryStore = useCategoryStore()
 
 const userStore = useUserStore()
 
@@ -144,7 +153,7 @@ const emit = defineEmits(['changeScene'])
 
 let saleAttrIdAndValueName = ref<string>('')
 
-defineExpose({ init })
+defineExpose({ initUpdate, initAdd })
 
 const dialogImageUrl = ref('')
 const dialogVisible = ref(false)
@@ -162,9 +171,11 @@ function beforeUpload(rawFile: UploadRawFile) {
       return true
     } else {
       ElMessage.error('上传图片不能大于5M')
+      return false
     }
   } else {
     ElMessage.error('上传图片格式不正确')
+    return false
   }
 }
 
@@ -174,14 +185,14 @@ const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
 }
 
 const cancel = () => {
-  emit('changeScene', 0)
+  emit('changeScene', 0, false) // 取消,跳转当前页
 }
 
 const spuParams = ref<record>({
   spuName: '',
   description: '',
   category3Id: 0,
-  tmId: 0,
+  tmId: null,
   spuImageList: [],
   spuSaleAttrList: [],
 })
@@ -191,7 +202,7 @@ const baseSaleAttrList = ref<baseSaleAttrValue[]>([])
 const imgList = ref<spuImgList>([])
 const saleAttrList = ref<saleAttr[]>([])
 
-async function init(row: record) {
+async function initUpdate(row: record) {
   // console.log(row)
   spuParams.value = row
   let res1 = await reqGetAllTrademark() // 获取所有品牌
@@ -282,10 +293,33 @@ async function save() {
 
   if (res.code === 200) {
     ElMessage.success(spuParams.value.id ? '修改成功' : '添加成功')
-    emit('changeScene', 0) //跳转到列表页
+    emit('changeScene', 0, spuParams.value.id ? true : false) //跳转到列表页
   } else {
     ElMessage.error(spuParams.value.id ? '修改失败' : '添加失败')
   }
+}
+
+//新增初始化
+async function initAdd(c3Id: number) {
+  //清除数据
+  Object.assign(spuParams.value, {
+    spuName: '',
+    description: '',
+    category3Id: 0,
+    tmId: null,
+    spuImageList: [],
+    spuSaleAttrList: [],
+    id: undefined,
+  })
+  imgList.value = [] //清空图片
+  saleAttrList.value = [] //清空销售属性
+  newInputAttrValue.value = ''
+
+  let res1 = await reqGetAllTrademark() // 获取所有品牌
+  let res2 = await reqBaseSaleAttrList()
+  spuParams.value.category3Id = c3Id
+  allTradeMark.value = res1.data
+  baseSaleAttrList.value = res2.data // 获取所有销售属性
 }
 </script>
 

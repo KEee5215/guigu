@@ -11,7 +11,7 @@ export interface record {
   spuName: string
   description: string
   category3Id: number
-  tmId: number
+  tmId: number | null
   spuImageList: null | spuImgList
   spuSaleAttrList: null | saleAttr[]
 }
