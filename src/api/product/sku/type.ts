@@ -42,8 +42,46 @@ export interface saleAttr {
   saleAttrName: string
   spuSaleAttrValueList: saleAttrValueList
   flag?: boolean
+  attrIdAndValueId?: string
 }
 
 export interface skuHasSaleAttrValueList extends responseData {
   data: saleAttr[]
+}
+
+export interface skuSaleAttrValue {
+  id: number
+  saleAttrId: string
+  saleAttrName: string
+  saleAttrValueId: string
+  saleAttrValueName: string
+  skuId: number
+}
+
+export interface skuAttrValue {
+  attrId: string
+  attrName: string
+  id: number
+  skuId: number
+  valueId: string
+  valueName: string
+}
+export type skuAttrValueList = skuAttrValue[]
+
+export type skuSaleAttrValueList = skuSaleAttrValue[]
+
+export interface saveSkuInfoParams {
+  category3Id: string
+  id: number
+  isSale?: number
+  price: string
+  skuAttrValueList: skuAttrValueList
+  skuDefaultImg: string
+  skuDesc: string
+  skuImageList: spuImgList
+  skuName: string
+  skuSaleAttrValueList: skuSaleAttrValueList
+  spuID: string
+  tmId: string
+  weight: string
 }

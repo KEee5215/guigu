@@ -38,6 +38,7 @@ export interface attrInfo {
   categoryId: number
   categoryLevel: number
   attrValueList: attrValueList
+  attrIdAndValueId?: string
 }
 
 export type attrInfoList = attrInfo[]

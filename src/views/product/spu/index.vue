@@ -24,7 +24,12 @@
           <el-table-column prop="description" label="SPU描述" width="320" />
           <el-table-column label="操作">
             <template #="{ $index, row }">
-              <el-button type="primary" icon="Plus" title="新增SKU"></el-button>
+              <el-button
+                type="primary"
+                icon="Plus"
+                title="新增SKU"
+                @click="addSku(row)"
+              ></el-button>
               <el-button
                 type="warning"
                 icon="Edit"
@@ -63,7 +68,7 @@
       <!-- SPU表单 -->
       <SpuForm ref="spu" v-show="scene === 1" @changeScene="changeScene" />
       <!-- SKU表单 -->
-      <SkuForm v-show="scene === 2" />
+      <SkuForm ref="sku" v-show="scene === 2" @changeScene="changeScene" />
     </el-card>
   </div>
 </template>
@@ -98,6 +103,7 @@ function changeScene(num: number, addOrEdit: boolean) {
 }
 
 const spu = ref<any>()
+const sku = ref<any>()
 
 // 分页相关
 const currentPage = ref<number>(1)
@@ -112,6 +118,11 @@ function addSpu() {
 function updateSpu(row: record) {
   scene.value = 1
   spu.value.initUpdate(row)
+}
+
+function addSku(row: record) {
+  sku.value.initAddSku(categoryStore.data.c1Id, categoryStore.data.c2Id, row)
+  scene.value = 2
 }
 
 async function getSpuPage(page: number, limit: number) {

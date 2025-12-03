@@ -7,7 +7,7 @@
         placeholder="请选择一级分类"
         style="width: 240px"
         @focus="categoryOne"
-        :disabled="scene === 1"
+        :disabled="scene !== 0"
       >
         <el-option
           v-for="item in category1"
@@ -22,7 +22,7 @@
         placeholder="请选择二级分类"
         style="width: 240px"
         @focus="categoryTwo"
-        :disabled="scene === 1"
+        :disabled="scene !== 0"
       >
         <el-option
           v-for="item in category2"
@@ -37,7 +37,7 @@
         placeholder="请选择三级分类"
         style="width: 240px"
         @focus="categoryThree"
-        :disabled="scene === 1"
+        :disabled="scene !== 0"
       >
         <el-option
           v-for="item in category3"
