@@ -85,3 +85,7 @@ export interface saveSkuInfoParams {
   tmId: string
   weight: string
 }
+
+export interface skuInfoDate extends responseData {
+  data: saveSkuInfoParams[]
+}

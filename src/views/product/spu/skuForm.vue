@@ -78,12 +78,13 @@
           border
           stripe
           :data="imgList"
+          @select-all="handleSelectAll"
+          @select="handleSelect"
         >
           <el-table-column
             type="selection"
             width="55"
             align="center"
-            :selectable="() => false"
           ></el-table-column>
           <el-table-column label="图片">
             <template #="{ row, $index }">
@@ -172,10 +173,6 @@ const initAddSku = async (c1Id: number, c2Id: number, spu: any) => {
   attrList.value = res.data
   saleAttrList.value = res1.data
   imgList.value = res2.data
-
-  console.log(res.data)
-  console.log(res1.data)
-  console.log(res2.data)
 }
 
 const table = ref<any>()
@@ -185,6 +182,19 @@ async function handler(row: any) {
   table.value.clearSelection()
   table.value.toggleRowSelection(row, true)
   skuParams.value.skuDefaultImg = row.imgUrl
+}
+
+function handleSelectAll(selection: any) {
+  table.value.clearSelection()
+  skuParams.value.skuDefaultImg = ''
+  ElMessage.warning('请选择一张图片')
+}
+
+function handleSelect(selection: any) {
+  // console.log(selection)
+  table.value.clearSelection()
+  skuParams.value.skuDefaultImg = ''
+  ElMessage.warning('请使用操作按钮')
 }
 
 async function save() {

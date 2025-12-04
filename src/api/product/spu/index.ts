@@ -8,6 +8,8 @@ const API = {
   SAVE_SPU_INFO_URL: '/admin/product/saveSpuInfo',
   //更新SPU接口
   UPDATE_SPU_INFO_URL: '/admin/product/updateSpuInfo',
+  //删除spu
+  DELETE_SPU_URL: '/admin/product/deleteSpu/',
 }
 
 export const reqSpuPage = (
@@ -30,4 +32,8 @@ export const reqAddOrUpdateSpuInfo = (data: record): any => {
   } else {
     return request.post<any, any>(API.SAVE_SPU_INFO_URL, data) //新增
   }
+}
+
+export const reqDeleteSpu = (spuId: number): any => {
+  return request.delete(API.DELETE_SPU_URL + spuId)
 }

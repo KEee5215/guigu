@@ -40,8 +40,12 @@
                 type="info"
                 icon="View"
                 title="查看SKU列表"
+                @click="getSkuList(row)"
               ></el-button>
-              <el-popconfirm :title="`你确定删除${row.name}吗?`">
+              <el-popconfirm
+                :title="`你确定删除${row.spuName}吗?`"
+                @confirm="deleteSpu(row)"
+              >
                 <template #reference>
                   <el-button
                     type="danger"
@@ -69,6 +73,24 @@
       <SpuForm ref="spu" v-show="scene === 1" @changeScene="changeScene" />
       <!-- SKU表单 -->
       <SkuForm ref="sku" v-show="scene === 2" @changeScene="changeScene" />
+
+      <!-- dialog -->
+      <el-dialog title="SKU列表" v-model="showSku">
+        <el-table :data="skuList" border empty-text="暂无数据">
+          <el-table-column prop="skuName" label="sku名称" />
+          <el-table-column prop="price" label="sku价格" />
+          <el-table-column prop="weight" label="sku重量" />
+          <el-table-column label="sku图片">
+            <template #="{ row }">
+              <el-image
+                style="width: 80px; height: 80px"
+                :src="row.skuDefaultImg"
+                :preview-src-list="[row.skuDefaultImg]"
+              ></el-image>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -77,18 +99,22 @@
 import Category from '@/components/Category/index.vue'
 import { ref, watch } from 'vue'
 import { useCategoryStore } from '@/store/modules/category'
-import { reqSpuPage } from '@/api/product/spu'
+import { reqDeleteSpu, reqSpuPage } from '@/api/product/spu'
 import { ElMessage } from 'element-plus'
 import { type records } from '@/api/product/spu/type'
 import SpuForm from './spuForm.vue'
 import SkuForm from './skuForm.vue'
 import type { record } from '@/api/product/spu/type'
+import { reqGetSkuList } from '@/api/product/sku'
+
+import type { saveSkuInfoParams } from '@/api/product/sku/type'
 const categoryStore = useCategoryStore()
 
 const tableData = ref<records>([])
 
 // 场景切换
 const scene = ref<number>(0) // 0: 列表  1:spu  2:  sku
+const showSku = ref<boolean>(false)
 
 function changeScene(num: number, addOrEdit: boolean) {
   scene.value = num
@@ -104,6 +130,8 @@ function changeScene(num: number, addOrEdit: boolean) {
 
 const spu = ref<any>()
 const sku = ref<any>()
+
+const skuList = ref<saveSkuInfoParams[]>([])
 
 // 分页相关
 const currentPage = ref<number>(1)
@@ -157,6 +185,26 @@ function handleSizeChange(size: number) {
 function handleCurrentChange(page: number) {
   currentPage.value = page
   getSpuPage(currentPage.value, pageSize.value)
+}
+
+async function getSkuList(row: record) {
+  let res = await reqGetSkuList(row.id as number)
+  if (res.code === 200) {
+    skuList.value = res.data
+    showSku.value = true
+  } else {
+    ElMessage.error(res.message)
+  }
+}
+
+async function deleteSpu(row: record) {
+  let res = await reqDeleteSpu(row.id as number)
+  if (res.code === 200) {
+    ElMessage.success(res.message)
+    getSpuPage(currentPage.value, pageSize.value)
+  } else {
+    ElMessage.error(res.message)
+  }
 }
 </script>
 
