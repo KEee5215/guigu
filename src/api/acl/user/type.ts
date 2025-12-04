@@ -13,10 +13,10 @@ export interface user {
   updateTime?: ''
   id?: number
   username: string
-  roleName: string
+  roleName?: string
   password: string
   name: string
-  phone: string
+  phone?: string
 }
 
 export type records = user[]

@@ -13,7 +13,7 @@
     </el-card>
 
     <el-card>
-      <el-button type="primary">添加</el-button>
+      <el-button type="primary" @click="addUser">添加</el-button>
       <el-button type="danger">批量删除</el-button>
       <!-- 表格 -->
       <el-table
@@ -40,7 +40,7 @@
           prop="username"
         ></el-table-column>
         <el-table-column
-          label="用户名称"
+          label="用户昵称"
           show-overflow-tooltip
           prop="name"
         ></el-table-column>
@@ -64,7 +64,14 @@
             <el-button type="primary" size="small" icon="User">
               分配角色
             </el-button>
-            <el-button type="warning" size="small" icon="Edit">编辑</el-button>
+            <el-button
+              type="warning"
+              size="small"
+              icon="Edit"
+              @click="editUser(row)"
+            >
+              编辑
+            </el-button>
             <el-button type="danger" size="small" icon="Delete">删除</el-button>
           </template>
         </el-table-column>
@@ -81,14 +88,48 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
+    <!-- 抽屉 -->
+    <el-drawer v-model="drawer">
+      <template #header>
+        <h2>{{ reqName }}用户</h2>
+      </template>
+      <template #default>
+        <el-form :model="userParams">
+          <el-form-item label="用户姓名" prop="name">
+            <el-input
+              placeholder="请输入用户姓名"
+              v-model="userParams.name"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="用户昵称" prop="username">
+            <el-input
+              placeholder="请输入用户昵称"
+              v-model="userParams.username"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="用户密码" prop="password">
+            <el-input
+              placeholder="请输入用户密码"
+              v-model="userParams.password"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+      </template>
+      <template #footer>
+        <div style="flex: auto">
+          <el-button @click="cancel">取消</el-button>
+          <el-button type="primary" @click="save">确定</el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reqGetUserPage } from '@/api/acl/user'
+import { reqAddOrUpdateUser, reqGetUserPage } from '@/api/acl/user'
 import type { records, user, userListResponseData } from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 // 分页相关
 const currentPage = ref<number>(1)
@@ -97,6 +138,20 @@ const total = ref<number>(0)
 
 //用户数据
 const userList = ref<records>([])
+
+//收集数据
+const userParams = ref<user>({
+  username: '',
+  password: '',
+  name: '',
+})
+
+// 抽屉相关
+const drawer = ref<boolean>(false)
+
+let reqName = computed(() => {
+  return userParams.value.id ? '编辑' : '添加'
+})
 
 // 获取分页数据
 async function getUserPage(page: number, limit: number) {
@@ -131,6 +186,31 @@ onMounted(async () => {
   userList.value = res.records
   // console.log(res)
 })
+
+function addUser() {
+  drawer.value = true
+}
+
+function editUser(row: user) {
+  userParams.value = row
+  drawer.value = true
+}
+
+function cancel() {
+  drawer.value = false
+}
+// 保存
+async function save() {
+  let res = await reqAddOrUpdateUser(userParams.value)
+
+  if (res.code === 200) {
+    getUserPage(currentPage.value, pageSize.value)
+    ElMessage.success(`${reqName.value}成功`)
+  } else {
+    ElMessage.error(`${reqName.value}失败`)
+  }
+  drawer.value = false
+}
 </script>
 
 <style scoped>
