@@ -14,14 +14,26 @@
 
     <el-card>
       <el-button type="primary" @click="addUser">添加</el-button>
-      <el-button type="danger">批量删除</el-button>
+      <el-popconfirm
+        :title="`确定删除选中用户吗?`"
+        width="250px"
+        icon="Delete"
+        @confirm="deleteSelectedUsers"
+      >
+        <template #reference>
+          <el-button type="danger">批量删除</el-button>
+        </template>
+      </el-popconfirm>
+
       <!-- 表格 -->
       <el-table
+        ref="TableRef"
         class="table"
         :data="userList"
         border
         stripe
         empty-text="暂无数据"
+        @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50"></el-table-column>
         <el-table-column
@@ -77,7 +89,21 @@
             >
               编辑
             </el-button>
-            <el-button type="danger" size="small" icon="Delete">删除</el-button>
+
+            <!--  -->
+            <el-popconfirm
+              :title="`确定删除${row.name}吗?`"
+              width="250px"
+              icon="Delete"
+              @confirm="deleteUser(row.id)"
+            >
+              <template #reference>
+                <el-button type="danger" size="small" icon="Delete">
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
+            <!--  -->
           </template>
         </el-table-column>
       </el-table>
@@ -178,6 +204,8 @@ import {
   reqAssignRoles,
   reqGetUserPage,
   reqGetUserRoles,
+  reqUserBatchRemove,
+  reqUserRemove,
 } from '@/api/acl/user'
 import type {
   allRoleList,
@@ -397,12 +425,46 @@ async function saveRole() {
   //发送请求
   let res = await reqAssignRoles(assignRoleParams.value)
   if (res.code === 200) {
-    getUserPage(currentPage.value, pageSize.value)
+    await getUserPage(currentPage.value, pageSize.value)
     ElMessage.success('分配角色成功')
   } else {
     ElMessage.error('分配角色失败')
   }
   drawer1.value = false
+}
+
+// 删除用户
+async function deleteUser(id: number) {
+  let res = await reqUserRemove(id as number)
+  if (res.code === 200) {
+    ElMessage.success('删除用户成功')
+    await getUserPage(currentPage.value, pageSize.value)
+  } else {
+    ElMessage.error('删除用户失败')
+  }
+}
+
+const TableRef = ref()
+// 批量删除的数组
+const Selection = ref<number[]>([])
+async function handleSelectionChange(val: any) {
+  Selection.value = val.map((item: any) => item.id) //获取选中的ids
+  console.log(Selection.value)
+}
+
+async function deleteSelectedUsers() {
+  if (Selection.value.length === 0) {
+    ElMessage.warning('请选择要删除的用户')
+    return
+  }
+
+  let res = await reqUserBatchRemove(Selection.value)
+  if (res.code === 200) {
+    ElMessage.success('批量删除用户成功')
+    await getUserPage(currentPage.value, pageSize.value)
+  } else {
+    ElMessage.error('批量删除用户失败')
+  }
 }
 </script>
 
