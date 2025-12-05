@@ -30,3 +30,26 @@ export interface userListResponseData extends responseData {
     records: records
   }
 }
+
+export interface role {
+  id?: number
+  roleName: string
+  remarks: string
+  createTime?: string
+  updateTime?: string
+}
+
+export type allRoleList = role[]
+
+export interface userRolesResponseData extends responseData {
+  data: {
+    allRolesList: allRoleList
+    assignRoles: allRoleList
+  }
+}
+
+//分配角色的参数类型
+export interface assignRoleParams {
+  roleIdList: number[]
+  userId: number
+}

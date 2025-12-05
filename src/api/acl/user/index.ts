@@ -1,5 +1,10 @@
 import request from '@/utils/requestHelper'
-import type { user, userListResponseData } from './type'
+import type {
+  assignRoleParams,
+  user,
+  userListResponseData,
+  userRolesResponseData,
+} from './type'
 
 const API = {
   //获取用户分页列表
@@ -8,6 +13,10 @@ const API = {
   SAVE_USER_URL: '/admin/acl/user/save',
   //修改
   UPDATE_USER_URL: '/admin/acl/user/update',
+  //用户角色分配
+  GET_USER_ROLES_URL: '/admin/acl/user/toAssign',
+  //分配角色
+  ASSIGN_ROLES_URL: '/admin/acl/user/doAssignRole',
 }
 
 export const reqGetUserPage = (
@@ -30,4 +39,14 @@ export const reqAddOrUpdateUser = (data: user) => {
   } else {
     return request.post<any, any>(API.SAVE_USER_URL, data)
   }
+}
+
+export const reqGetUserRoles = (
+  userId: number,
+): Promise<userRolesResponseData> => {
+  return request.get(API.GET_USER_ROLES_URL + `/${userId}`)
+}
+
+export const reqAssignRoles = (data: assignRoleParams) => {
+  return request.post<any, any>(API.ASSIGN_ROLES_URL, data)
 }

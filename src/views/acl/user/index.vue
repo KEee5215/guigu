@@ -61,7 +61,12 @@
         ></el-table-column>
         <el-table-column label="操作" width="300px">
           <template #="{ row, $index }">
-            <el-button type="primary" size="small" icon="User">
+            <el-button
+              type="primary"
+              size="small"
+              icon="User"
+              @click="setRole(row)"
+            >
               分配角色
             </el-button>
             <el-button
@@ -122,13 +127,68 @@
         </div>
       </template>
     </el-drawer>
+
+    <!-- 角色分配: 抽屉 -->
+    <el-drawer v-model="drawer1">
+      <template #header>
+        <h2>角色分配</h2>
+      </template>
+      <template #default>
+        <el-form>
+          <el-form-item label="用户名">
+            <el-input :disabled="true" v-model="userParams.username"></el-input>
+          </el-form-item>
+          <el-form-item label="用户角色">
+            <el-checkbox
+              v-model="checkAll"
+              :indeterminate="isIndeterminate"
+              @change="handleCheckAllChange"
+            >
+              全选
+            </el-checkbox>
+            <el-checkbox-group
+              v-model="checkedRoles"
+              @change="handleCheckedRolesChange"
+            >
+              <el-checkbox
+                v-for="role in allRoles"
+                :key="role"
+                :label="role"
+                :value="role"
+              >
+                {{ role.roleName }}
+              </el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+        </el-form>
+      </template>
+      <template #footer>
+        <div style="flex: auto">
+          <el-button @click="cancel">取消</el-button>
+          <el-button type="primary" @click="saveRole">确定</el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reqAddOrUpdateUser, reqGetUserPage } from '@/api/acl/user'
-import type { records, user, userListResponseData } from '@/api/acl/user/type'
-import { ElMessage } from 'element-plus'
+import {
+  reqAddOrUpdateUser,
+  reqAssignRoles,
+  reqGetUserPage,
+  reqGetUserRoles,
+} from '@/api/acl/user'
+import type {
+  allRoleList,
+  assignRoleParams,
+  records,
+  user,
+  userListResponseData,
+  userRolesResponseData,
+} from '@/api/acl/user/type'
+import { ElMessage, type CheckboxValueType } from 'element-plus'
+
 import { ref, onMounted, computed, nextTick } from 'vue'
 
 // 分页相关
@@ -148,9 +208,13 @@ const userParams = ref<user>({
 
 // 抽屉相关
 const drawer = ref<boolean>(false)
-
+const drawer1 = ref<boolean>(false)
 //获取form组件实例
 const formRef = ref<any>()
+
+//全选框
+const checkAll = ref<boolean>(false)
+const isIndeterminate = ref(true)
 
 //
 const validateUsername = (rule: any, value: string, callback: any) => {
@@ -271,6 +335,7 @@ function editUser(row: user) {
 
 function cancel() {
   drawer.value = false
+  drawer.value = false
 }
 // 保存
 async function save() {
@@ -289,6 +354,55 @@ async function save() {
   // await getUserPage(currentPage.value, pageSize.value)
   // 刷新
   window.location.reload()
+}
+
+const checkedRoles = ref<allRoleList>([])
+const allRoles = ref<allRoleList>([])
+//分配角色
+async function setRole(row: user) {
+  let res: userRolesResponseData = await reqGetUserRoles(row.id as number)
+  allRoles.value = res.data.allRolesList
+  checkedRoles.value = res.data.assignRoles
+  console.log(res)
+  Object.assign(userParams.value, row)
+  drawer1.value = true
+}
+
+// 全选框
+const handleCheckAllChange = (val: CheckboxValueType) => {
+  checkedRoles.value = val ? allRoles.value : [] //如果全部单选框被选中，则赋值true，否则为false
+  isIndeterminate.value = false
+}
+
+// 单选框处理函数也相应调整
+const handleCheckedRolesChange = (value: CheckboxValueType[]) => {
+  const checkedCount = value.length
+  checkAll.value = checkedCount === allRoles.value.length
+  isIndeterminate.value =
+    checkedCount > 0 && checkedCount < allRoles.value.length
+}
+
+const assignRoleParams = ref<assignRoleParams>({
+  roleIdList: [],
+  userId: 0,
+})
+
+// 保存角色分配
+async function saveRole() {
+  //赋值
+  assignRoleParams.value.roleIdList = checkedRoles.value.map(
+    (item) => item.id,
+  ) as number[]
+  assignRoleParams.value.userId = userParams.value.id as number
+  //发送请求
+  let res = await reqAssignRoles(assignRoleParams.value)
+  if (res.code === 200) {
+    getUserPage(currentPage.value, pageSize.value)
+    ElMessage.success('分配角色成功')
+  } else {
+    ElMessage.error('分配角色失败')
+  }
+  drawer1.value = false
 }
 </script>
 
