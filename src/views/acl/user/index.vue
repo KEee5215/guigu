@@ -35,14 +35,14 @@
           show-overflow-tooltip
         ></el-table-column>
         <el-table-column
-          label="用户名字"
+          label="用户名"
           show-overflow-tooltip
-          prop="username"
+          prop="name"
         ></el-table-column>
         <el-table-column
           label="用户昵称"
           show-overflow-tooltip
-          prop="name"
+          prop="username"
         ></el-table-column>
         <el-table-column
           label="用户角色"
@@ -94,7 +94,7 @@
         <h2>{{ reqName }}用户</h2>
       </template>
       <template #default>
-        <el-form :model="userParams">
+        <el-form :model="userParams" :rules="rules" ref="formRef">
           <el-form-item label="用户姓名" prop="name">
             <el-input
               placeholder="请输入用户姓名"
@@ -107,7 +107,7 @@
               v-model="userParams.username"
             ></el-input>
           </el-form-item>
-          <el-form-item label="用户密码" prop="password">
+          <el-form-item label="用户密码" prop="password" v-if="!userParams.id">
             <el-input
               placeholder="请输入用户密码"
               v-model="userParams.password"
@@ -129,7 +129,7 @@
 import { reqAddOrUpdateUser, reqGetUserPage } from '@/api/acl/user'
 import type { records, user, userListResponseData } from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 
 // 分页相关
 const currentPage = ref<number>(1)
@@ -149,6 +149,62 @@ const userParams = ref<user>({
 // 抽屉相关
 const drawer = ref<boolean>(false)
 
+//获取form组件实例
+const formRef = ref<any>()
+
+//
+const validateUsername = (rule: any, value: string, callback: any) => {
+  if (value.trim().length > 2) {
+    callback()
+  } else {
+    callback(new Error('用户名至少五位'))
+  }
+}
+
+const validateName = (rule: any, value: string, callback: any) => {
+  if (value.trim().length > 2) {
+    callback()
+  } else {
+    callback(new Error('用户名至少五位'))
+  }
+}
+
+const validatePassword = (rule: any, value: string, callback: any) => {
+  if (10 <= value.trim().length && value.trim().length <= 30) {
+    callback()
+  } else {
+    callback(new Error('密码在10-30位之间'))
+  }
+}
+
+//表单校验
+const rules = {
+  // 用户名
+  username: [
+    {
+      required: true,
+      trigger: 'blur',
+      validator: validateUsername,
+    },
+  ],
+  // 用户昵称
+  name: [
+    {
+      required: true,
+      trigger: 'blur',
+      validator: validateName,
+    },
+  ],
+  // 用户密码
+  password: [
+    {
+      required: true,
+      trigger: 'blur',
+      validator: validatePassword,
+    },
+  ],
+}
+
 let reqName = computed(() => {
   return userParams.value.id ? '编辑' : '添加'
 })
@@ -158,10 +214,9 @@ async function getUserPage(page: number, limit: number) {
   let res: userListResponseData = await reqGetUserPage(page, limit, null)
   if (res.code === 200) {
     total.value = res.data.total
-    return res.data
+    userList.value = res.data.records
   } else {
     ElMessage.error(res.message)
-    return { records: [] }
   }
 }
 
@@ -171,28 +226,46 @@ async function handleSizeChange(size: number) {
   currentPage.value = 1
   //todo: 获取分页数据
   await getUserPage(currentPage.value, pageSize.value)
+  console.log('执行了')
 }
 
 async function handleCurrentChange(page: number) {
   currentPage.value = page
   //todo: 获取分页数据
   await getUserPage(currentPage.value, pageSize.value)
+  console.log('执行了')
 }
 
 onMounted(async () => {
   //todo: 获取分页数据
-  let res = await getUserPage(currentPage.value, pageSize.value)
-  console.log(res)
-  userList.value = res.records
-  // console.log(res)
+  await getUserPage(currentPage.value, pageSize.value)
 })
 
 function addUser() {
+  // 重置表单数据
+  userParams.value = {
+    username: '',
+    password: '',
+    name: '',
+  }
+
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.clearValidate()
+    }
+  })
+
   drawer.value = true
 }
 
 function editUser(row: user) {
-  userParams.value = row
+  Object.assign(userParams.value, row)
+
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.clearValidate()
+    }
+  })
   drawer.value = true
 }
 
@@ -201,6 +274,9 @@ function cancel() {
 }
 // 保存
 async function save() {
+  // 表单校验
+  await formRef.value.validate()
+
   let res = await reqAddOrUpdateUser(userParams.value)
 
   if (res.code === 200) {
@@ -210,6 +286,9 @@ async function save() {
     ElMessage.error(`${reqName.value}失败`)
   }
   drawer.value = false
+  // await getUserPage(currentPage.value, pageSize.value)
+  // 刷新
+  window.location.reload()
 }
 </script>
 
