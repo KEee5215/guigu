@@ -15,7 +15,7 @@
       </el-form>
     </el-card>
 
-    <el-card>
+    <el-card class="card">
       <el-button type="primary" @click="addUser">添加</el-button>
       <el-popconfirm
         :title="`确定删除选中用户吗?`"
@@ -331,14 +331,12 @@ async function handleSizeChange(size: number) {
   currentPage.value = 1
   //todo: 获取分页数据
   await getUserPage(currentPage.value, pageSize.value, null)
-  console.log('执行了')
 }
 
 async function handleCurrentChange(page: number) {
   currentPage.value = page
   //todo: 获取分页数据
   await getUserPage(currentPage.value, pageSize.value, null)
-  console.log('执行了')
 }
 
 onMounted(async () => {
@@ -485,17 +483,13 @@ const searchParams = ref<{
   pageSize: number
   username: string | null
 }>({
-  currentPage: currentPage.value,
+  currentPage: 1,
   pageSize: pageSize.value,
   username: null,
 })
 
 async function search() {
-  await getUserPage(
-    currentPage.value,
-    pageSize.value,
-    searchParams.value.username,
-  )
+  await getUserPage(1, pageSize.value, searchParams.value.username)
   ElMessage.success('搜索成功')
 }
 
@@ -519,6 +513,10 @@ async function reset() {
 }
 
 .table {
+  margin-top: 20px;
+}
+
+.card {
   margin-top: 20px;
 }
 </style>

@@ -34,7 +34,7 @@ export interface userListResponseData extends responseData {
 export interface role {
   id?: number
   roleName: string
-  remarks: string
+  remarks?: string
   createTime?: string
   updateTime?: string
 }
