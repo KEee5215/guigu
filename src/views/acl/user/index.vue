@@ -3,11 +3,14 @@
     <el-card>
       <el-form :inline="true" class="form">
         <el-form-item label="用户名">
-          <el-input placeholder="请输入用户名"></el-input>
+          <el-input
+            placeholder="请输入用户名"
+            v-model="searchParams.username"
+          ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary">搜索</el-button>
-          <el-button type="primary">重置</el-button>
+          <el-button type="primary" @click="search">搜索</el-button>
+          <el-button type="primary" @click="reset">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -302,8 +305,18 @@ let reqName = computed(() => {
 })
 
 // 获取分页数据
-async function getUserPage(page: number, limit: number) {
-  let res: userListResponseData = await reqGetUserPage(page, limit, null)
+async function getUserPage(
+  page: number,
+  limit: number,
+  username: string | null,
+) {
+  let res: userListResponseData
+  if (username) {
+    res = await reqGetUserPage(page, limit, username)
+  } else {
+    res = await reqGetUserPage(page, limit, null)
+  }
+
   if (res.code === 200) {
     total.value = res.data.total
     userList.value = res.data.records
@@ -317,20 +330,20 @@ async function handleSizeChange(size: number) {
   pageSize.value = size
   currentPage.value = 1
   //todo: 获取分页数据
-  await getUserPage(currentPage.value, pageSize.value)
+  await getUserPage(currentPage.value, pageSize.value, null)
   console.log('执行了')
 }
 
 async function handleCurrentChange(page: number) {
   currentPage.value = page
   //todo: 获取分页数据
-  await getUserPage(currentPage.value, pageSize.value)
+  await getUserPage(currentPage.value, pageSize.value, null)
   console.log('执行了')
 }
 
 onMounted(async () => {
   //todo: 获取分页数据
-  await getUserPage(currentPage.value, pageSize.value)
+  await getUserPage(currentPage.value, pageSize.value, null)
 })
 
 function addUser() {
@@ -373,7 +386,7 @@ async function save() {
   let res = await reqAddOrUpdateUser(userParams.value)
 
   if (res.code === 200) {
-    getUserPage(currentPage.value, pageSize.value)
+    getUserPage(currentPage.value, pageSize.value, null)
     ElMessage.success(`${reqName.value}成功`)
   } else {
     ElMessage.error(`${reqName.value}失败`)
@@ -425,7 +438,7 @@ async function saveRole() {
   //发送请求
   let res = await reqAssignRoles(assignRoleParams.value)
   if (res.code === 200) {
-    await getUserPage(currentPage.value, pageSize.value)
+    await getUserPage(currentPage.value, pageSize.value, null)
     ElMessage.success('分配角色成功')
   } else {
     ElMessage.error('分配角色失败')
@@ -438,13 +451,12 @@ async function deleteUser(id: number) {
   let res = await reqUserRemove(id as number)
   if (res.code === 200) {
     ElMessage.success('删除用户成功')
-    await getUserPage(currentPage.value, pageSize.value)
+    await getUserPage(currentPage.value, pageSize.value, null)
   } else {
     ElMessage.error('删除用户失败')
   }
 }
 
-const TableRef = ref()
 // 批量删除的数组
 const Selection = ref<number[]>([])
 async function handleSelectionChange(val: any) {
@@ -461,10 +473,41 @@ async function deleteSelectedUsers() {
   let res = await reqUserBatchRemove(Selection.value)
   if (res.code === 200) {
     ElMessage.success('批量删除用户成功')
-    await getUserPage(currentPage.value, pageSize.value)
+    await getUserPage(currentPage.value, pageSize.value, null)
   } else {
     ElMessage.error('批量删除用户失败')
   }
+}
+
+//搜索
+const searchParams = ref<{
+  currentPage: number
+  pageSize: number
+  username: string | null
+}>({
+  currentPage: currentPage.value,
+  pageSize: pageSize.value,
+  username: null,
+})
+
+async function search() {
+  await getUserPage(
+    currentPage.value,
+    pageSize.value,
+    searchParams.value.username,
+  )
+  ElMessage.success('搜索成功')
+}
+
+//重置
+async function reset() {
+  searchParams.value = {
+    currentPage: currentPage.value,
+    pageSize: pageSize.value,
+    username: null,
+  }
+  await getUserPage(currentPage.value, pageSize.value, null)
+  ElMessage.success('重置成功')
 }
 </script>
 
