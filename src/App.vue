@@ -4,9 +4,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { onMounted } from 'vue'
-import { reqLogin } from './api/user'
-</script>
+<script setup lang="ts"></script>
 
 <style scoped lang="scss"></style>

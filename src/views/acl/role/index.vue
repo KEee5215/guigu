@@ -124,16 +124,48 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 分配权限抽屉 -->
+
+    <el-drawer v-model="drawer">
+      <template #header>
+        <h4>权限分配</h4>
+      </template>
+      <template #default>
+        <el-tree
+          ref="treeRef"
+          style="max-width: 600px"
+          :data="menuData"
+          show-checkbox
+          empty-text="暂无数据"
+          node-key="id"
+          default-expand-all
+          :default-checked-keys="checkedMenu"
+          :props="defaultProps"
+        />
+      </template>
+      <template #footer>
+        <div style="flex: auto">
+          <el-button @click="cancelClick">取消</el-button>
+          <el-button type="primary" @click="confirmClick">确定</el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
+import { reqDoAssign, reqGetRoleMenu } from '@/api/acl/menu'
+import type { menuDateList } from '@/api/acl/menu/type'
 import { reqAddOrUpdateRole, reqGetRolePage } from '@/api/acl/role'
 import type { records, roleListResponseData } from '@/api/acl/role/type'
 import type { role } from '@/api/acl/role/type'
-import { reqUserRemove } from '@/api/acl/user'
+import { reqAssignRoles, reqUserRemove } from '@/api/acl/user'
 import { ElMessage } from 'element-plus'
-import { ref, onMounted, reactive, computed } from 'vue'
+
+import { ref, onMounted, computed, useTemplateRef } from 'vue'
+//抽屉
+const drawer = ref<boolean>(false)
 
 // 分页相关
 const currentPage = ref<number>(1)
@@ -218,10 +250,6 @@ const deleteRole = (id: number) => {
   })
 }
 
-const assignAcl = (row: any) => {
-  console.log(row)
-}
-
 async function save() {
   let res = await reqAddOrUpdateRole(roleParam.value)
   if (res.code === 200) {
@@ -262,6 +290,66 @@ function reset() {
     roleName: null,
   }
   getRolePage(1, pageSize.value, null)
+}
+
+const defaultProps = {
+  children: 'children',
+  label: 'name',
+}
+
+//存储菜单数据
+const menuData = ref<menuDateList>([])
+//存储选中的菜单
+const checkedMenu = ref<number[]>([])
+
+//函数,过滤选中的四级菜单
+const filterMenu = (allData: any, initData: any) => {
+  allData.forEach((item: any) => {
+    if (item.level === 4 && item.select) {
+      initData.push(item.id)
+    }
+    if (item.children) {
+      filterMenu(item.children, initData)
+    }
+  })
+}
+
+// 分配权限
+const assignAcl = async (row: role) => {
+  checkedMenu.value = []
+  Object.assign(roleParam.value, row)
+  let res = await reqGetRoleMenu(row.id as number)
+  console.log(res)
+  if (res.code === 200) {
+    menuData.value = res.data
+    filterMenu(menuData.value, checkedMenu.value)
+  } else {
+    ElMessage.error('获取权限菜单失败')
+  }
+  drawer.value = true
+}
+
+function cancelClick() {
+  drawer.value = false
+}
+
+//获取被选中的组件的key数组
+const TreeRef = useTemplateRef('treeRef')
+async function confirmClick() {
+  const roleId = roleParam.value.id as number
+  const checkedKeys = TreeRef.value.getCheckedKeys()
+  //半选
+  const halfCheckedKeys = TreeRef.value.getHalfCheckedKeys()
+  //合并
+  checkedKeys.push(...halfCheckedKeys)
+
+  let res = await reqDoAssign(roleId, checkedKeys)
+  if (res.code === 200) {
+    ElMessage.success('分配权限成功')
+  } else {
+    ElMessage.error('分配权限失败')
+  }
+  drawer.value = false
 }
 </script>
 
