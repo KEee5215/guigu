@@ -50,13 +50,15 @@ import { useLayOutSettingStore } from '@/store/modules/setting'
 import { ref, computed } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 import { useRouter, useRoute } from 'vue-router'
-const switchValue = ref(false)
 
 const router = useRouter()
 const route = useRoute()
 
 let layOutSettingStore = useLayOutSettingStore()
 const userStore = useUserStore()
+
+// 暗黑模式
+const switchValue = ref<boolean>(layOutSettingStore.isDark)
 
 // 刷新
 function refresh() {
@@ -113,6 +115,7 @@ const predefineColors = ref([
 ])
 
 function changeTheme() {
+  layOutSettingStore.isDark = switchValue.value
   const htmlElement = document.documentElement
   if (switchValue.value) {
     htmlElement.classList.add('dark')

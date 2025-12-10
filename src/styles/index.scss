@@ -2,10 +2,10 @@
 @import './reset.scss';
 
 // 暗黑模式下的全局背景色
-html.dark-background {
-  background-color: #141414; // 你可以根据需要调整颜色值
-  color: #ffffff; // 文字颜色也可以一并调整
-}
+// html.dark-background {
+//   background-color: #141414; // 你可以根据需要调整颜色值
+//   color: #ffffff; // 文字颜色也可以一并调整
+// }
 
 //滚动条
 ::-webkit-scrollbar {
@@ -24,5 +24,5 @@ html.dark-background {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #18a754;
+  background-color: #545454;
 }

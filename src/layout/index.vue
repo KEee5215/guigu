@@ -55,7 +55,6 @@ const userStore = useUserStore()
 .layout-container {
   height: 100vh;
   width: 100%;
-  background-color: aquamarine;
 
   .layout-slider {
     height: 100%;
@@ -78,7 +77,7 @@ const userStore = useUserStore()
   .layout-tabbar {
     height: $layout-tabbar-height;
     width: calc(100% - $layout-slider-width);
-    background-color: $layout-tabbar-color;
+    // background-color: $layout-tabbar-color;
     position: fixed;
     top: 0;
     left: $layout-slider-width;
@@ -93,7 +92,7 @@ const userStore = useUserStore()
   .layout-main {
     height: calc(100% - $layout-tabbar-height);
     width: calc(100% - $layout-slider-width);
-    background-color: #fcfcfc;
+
     position: absolute;
     top: $layout-tabbar-height;
     left: $layout-slider-width;
