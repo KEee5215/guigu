@@ -6,6 +6,10 @@ import App from '@/App.vue'
 // 引入Element Plus
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+
+// if you just want to import css
+import 'element-plus/theme-chalk/dark/css-vars.css'
+
 // 注册Element Plus
 //注册全局组件SVG
 import 'virtual:svg-icons-register'

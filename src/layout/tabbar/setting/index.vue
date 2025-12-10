@@ -1,7 +1,30 @@
 <template>
   <el-button icon="Refresh" circle @click="refresh" />
   <el-button :icon="iconName" circle @click="fullScreen" />
-  <el-button icon="Setting" circle />
+  <el-popover placement="bottom" title="主题设置" :width="200" trigger="click">
+    <el-form>
+      <el-form-item label="主题颜色">
+        <el-color-picker
+          v-model="color"
+          show-alpha
+          :predefine="predefineColors"
+        />
+      </el-form-item>
+      <el-form-item label="暗黑模式">
+        <el-switch
+          v-model="switchValue"
+          active-icon="Sunny"
+          inactive-icon="Moon"
+          inline-prompt
+          @change="changeTheme"
+        />
+      </el-form-item>
+    </el-form>
+    <template #reference>
+      <el-button icon="Setting" circle />
+    </template>
+  </el-popover>
+
   <div class="block">
     <el-avatar :size="32" :src="userStore.avatar" />
   </div>
@@ -27,6 +50,8 @@ import { useLayOutSettingStore } from '@/store/modules/setting'
 import { ref, computed } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 import { useRouter, useRoute } from 'vue-router'
+const switchValue = ref(false)
+
 const router = useRouter()
 const route = useRoute()
 
@@ -67,6 +92,35 @@ async function userLogout() {
   // 跳转登录页面
 
   router.push({ path: '/login', query: { redirect: route.path } })
+}
+
+const color = ref('rgba(255, 69, 0, 0.68)')
+const predefineColors = ref([
+  '#ff4500',
+  '#ff8c00',
+  '#ffd700',
+  '#90ee90',
+  '#00ced1',
+  '#1e90ff',
+  '#c71585',
+  'rgba(255, 69, 0, 0.68)',
+  'rgb(255, 120, 0)',
+  'hsv(51, 100, 98)',
+  'hsva(120, 40, 94, 0.5)',
+  'hsl(181, 100%, 37%)',
+  'hsla(209, 100%, 56%, 0.73)',
+  '#c7158577',
+])
+
+function changeTheme() {
+  const htmlElement = document.documentElement
+  if (switchValue.value) {
+    htmlElement.classList.add('dark')
+    htmlElement.classList.add('dark-background') // 添加暗黑模式背景类
+  } else {
+    htmlElement.classList.remove('dark')
+    htmlElement.classList.remove('dark-background') // 移除暗黑模式背景类
+  }
 }
 </script>
 
