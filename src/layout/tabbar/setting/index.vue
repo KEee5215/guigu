@@ -8,6 +8,7 @@
           v-model="color"
           show-alpha
           :predefine="predefineColors"
+          @change="setColor"
         />
       </el-form-item>
       <el-form-item label="暗黑模式">
@@ -58,7 +59,7 @@ let layOutSettingStore = useLayOutSettingStore()
 const userStore = useUserStore()
 
 // 暗黑模式
-const switchValue = ref<boolean>(layOutSettingStore.isDark)
+const switchValue = ref<boolean>(false)
 
 // 刷新
 function refresh() {
@@ -115,15 +116,16 @@ const predefineColors = ref([
 ])
 
 function changeTheme() {
-  layOutSettingStore.isDark = switchValue.value
   const htmlElement = document.documentElement
   if (switchValue.value) {
     htmlElement.classList.add('dark')
-    htmlElement.classList.add('dark-background') // 添加暗黑模式背景类
   } else {
     htmlElement.classList.remove('dark')
-    htmlElement.classList.remove('dark-background') // 移除暗黑模式背景类
   }
+}
+
+function setColor(color: string) {
+  document.documentElement.style.setProperty('--el-color-primary', color)
 }
 </script>
 

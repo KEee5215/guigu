@@ -6,7 +6,6 @@ export const useLayOutSettingStore = defineStore('settingStore', {
     return {
       isCollapse: false,
       refresh: false,
-      isDark: false,
     }
   },
 })
