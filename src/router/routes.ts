@@ -26,6 +26,10 @@ export const constantRoutes = [
     meta: { title: '可视化大屏', hidden: false, icon: 'Platform' },
     component: () => import('@/views/screen/index.vue'),
   },
+]
+
+//异步路由
+export const asyncRoutes = [
   {
     path: '/acl',
     name: 'Acl',
@@ -86,7 +90,10 @@ export const constantRoutes = [
       },
     ],
   },
+]
 
+//任意路由
+export const anyRoutes = [
   {
     path: '/404',
     name: '404',

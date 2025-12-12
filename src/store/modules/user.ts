@@ -12,7 +12,24 @@ import type {
 import { GET_TOKEN, REMOVE_TOKEN, SET_TOKEN } from '@/utils/tokenHelper'
 
 //引入静态路由数组
-import { constantRoutes } from '@/router/routes'
+import { anyRoutes, asyncRoutes, constantRoutes } from '@/router/routes'
+
+import router from '@/router'
+
+//引入深拷贝loadash
+//@ts-ignore
+import cloneDeep from 'lodash/cloneDeep'
+
+function filterRoutes(asyncRoutes: any, routes: any) {
+  return asyncRoutes.filter((item: any) => {
+    if (routes.includes(item.name)) {
+      if (item.children && item.children.length > 0) {
+        filterRoutes(cloneDeep(item.children), routes)
+      }
+      return true
+    }
+  })
+}
 
 //  `defineStore()` 的返回值的命名是自由的
 // 但最好含有 store 的名字，且以 `use` 开头，以 `Store` 结尾。
@@ -50,9 +67,24 @@ export const useUserStore = defineStore('User', {
       // console.log('获取用户信息')
       let result: userInfoResponseData = await reqUserInfo()
       console.log(result)
+
       if (result.code === 200) {
         this.username = result.data.name
         this.avatar = result.data.avatar
+        //过滤出有权限的路由
+        let asyncRoute = filterRoutes(asyncRoutes, result.data.routes)
+        this.menuRoutes = [...constantRoutes, ...asyncRoute, ...anyRoutes]
+
+        // 替换原来的代码
+        // 更好的实现方式
+        asyncRoute.forEach((route: any) => {
+          router.addRoute(route)
+        })
+
+        anyRoutes.forEach((route: any) => {
+          router.addRoute(route)
+        })
+
         return 'ok'
       } else {
         return Promise.reject(new Error(result.message))
