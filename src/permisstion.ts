@@ -4,40 +4,43 @@ import useUserStore from './store/modules/user'
 import pinia from '@/store/index'
 import setting from './setting'
 
-const userStore = useUserStore(pinia) //从pinia中获取token,通过是否有token来判断是否登录
-// console.log('@@userStore', userStore)
-
 import router from '@/router'
 import nprogress from 'nprogress'
 import 'nprogress/nprogress.css'
 nprogress.configure({ showSpinner: false })
 
+// 创建一个标志，避免重复添加路由
+let isAddedRoutes = false
+
 router.beforeEach(async (to, from, next) => {
   nprogress.start()
 
-  document.title = `${setting.title}-${to.meta.title}`
+  document.title = `${setting.title}-${to.meta.title || ''}`
+
+  // 每次都重新获取最新的 store 实例
+  const userStore = useUserStore(pinia)
   let token = userStore.token
   let username = userStore.username
-
-  console.log('路由守卫执行:', { token, username, toPath: to.path })
 
   if (token) {
     // 已登录
     if (to.path === '/login') {
       // 已登录还想去登录页，跳转到首页
-      console.log('已登录用户访问登录页，重定向到首页')
       next({ path: '/' })
     } else {
-      if (username) {
-        // 其它页面正常放行
-        console.log('用户已登录且有用户名，正常放行')
+      if (username && isAddedRoutes) {
+        // 用户信息存在且路由已添加，正常放行
         next()
       } else {
         try {
-          console.log('尝试获取用户信息')
+          // 获取用户信息
           await userStore.getUserInfo()
-          console.log('用户信息获取成功')
-          next({ ...to })
+
+          // 标记路由已添加
+          isAddedRoutes = true
+
+          // 使用 replace 避免重复导航
+          next({ ...to, replace: true })
         } catch (error) {
           //用户信息获取失败,因为是token过期了，需要重新登录
           //或者用户手动修改改token了
@@ -49,7 +52,8 @@ router.beforeEach(async (to, from, next) => {
     }
   } else {
     // 未登录
-    console.log('用户未登录')
+    isAddedRoutes = false // 重置路由添加状态
+
     if (to.path === '/login') {
       // 去登录页，放行
       next()
@@ -63,8 +67,3 @@ router.beforeEach(async (to, from, next) => {
 router.afterEach((to, from) => {
   nprogress.done()
 })
-
-// 权限控制
-//1.用户未登录,只能访问login,其余的页面都跳转到login
-
-//2.用户已登录,不能访问login[跳转到HOME页面],其余的页面都正常显示

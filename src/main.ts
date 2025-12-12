@@ -23,6 +23,11 @@ import pinia from '@/store'
 
 import './permisstion'
 
+//引入自定义指令
+import { isHasButton } from '@/directive/has'
+
 const app = createApp(App)
+
+isHasButton(app)
 
 app.use(ElementPlus).use(globalComponent).use(router).use(pinia).mount('#app')

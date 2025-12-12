@@ -43,6 +43,7 @@ export const useUserStore = defineStore('User', {
       menuRoutes: constantRoutes, //用户菜单路由
       username: '',
       avatar: '',
+      buttons: [],
     }
   },
   // 操作state的方法
@@ -71,6 +72,7 @@ export const useUserStore = defineStore('User', {
       if (result.code === 200) {
         this.username = result.data.name
         this.avatar = result.data.avatar
+        this.buttons = result.data.buttons
         //过滤出有权限的路由
         let asyncRoute = filterRoutes(asyncRoutes, result.data.routes)
         this.menuRoutes = [...constantRoutes, ...asyncRoute, ...anyRoutes]
